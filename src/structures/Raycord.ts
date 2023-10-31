@@ -1,5 +1,7 @@
 import { RaycordCommand } from "./RaycordCommand";
 import { Collection, Events } from 'discord.js';
+import { globSync } from 'glob'
+import { resolve } from 'path'
 import { RaycordEvent } from "./RaycordEvent";
 import { RaycordClient } from "./RaycordClient";
 import { CommandData, CommandRunner } from "types/command";
@@ -8,6 +10,7 @@ import { ClientData } from "types/client";
 import { RaycordConfig } from "types/raycord";
 
 export class Raycord {
+
   public client: RaycordClient;
   public commands: Collection<string, RaycordCommand>;
   public events: Collection<Events, RaycordEvent>;
@@ -16,32 +19,29 @@ export class Raycord {
     this.commands = new Collection();
     this.events = new Collection();
     this.client = new RaycordClient(client);
+
+    this.setup()
   }
 
   public command(data: CommandData, runner: CommandRunner) {
     const command = new RaycordCommand(data, runner);
-    this.commands.set(command.name, command);
+    return command;
   }
 
   public event(data: EventData, runner: EventRunner) {
     const event = new RaycordEvent(data, runner);
-    this.events.set(data.type, event);
+    return event;
   }
 
   public setup() {
-    /*
-     handler events/commands
-     
-    Ping command example
+    const { fileExtension, rootDirectory } = this.config;
+    const path = `${rootDirectory}/**/*${fileExtension}`;
 
-    module.exports = Raycord.command({
-      name: 'ping',
-      category: 'utils',
-      aliases: ['pong']
-    }, ({ message }) => {
-      message.reply('Pong!')
+    globSync(path).forEach(file => {
+      const command = require(resolve(file));
+      console.log(command.name)
+      this.commands.set(command.name, command)
     })
-     
-    */ 
+
   }
 }
