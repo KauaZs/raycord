@@ -1,7 +1,6 @@
 import { RaycordCommand } from "./RaycordCommand";
 import { Collection, Events } from 'discord.js';
 import { globSync } from 'glob'
-import { resolve } from 'path'
 import { RaycordEvent } from "./RaycordEvent";
 import { RaycordClient } from "./RaycordClient";
 import { CommandData, CommandRunner } from "types/command";
@@ -16,22 +15,18 @@ export class Raycord {
   public events: Collection<Events, RaycordEvent>;
   
   public static getInstance(client?: ClientData, config?: RaycordConfig) {
-    if (!this.instance && client && config) {
-      this.instance = new Raycord(client, config)
-      return this.instance;
-    } else if (this.instance) {
-      return this.instance;
-    } else {
-      return null;
-    }
+    if (Raycord.instance) return this.instance;
+
+    if(!client && !config) throw new Error('Expected client data and raycord config!');
+    
+    Raycord.instance = new Raycord(client as ClientData, config as RaycordConfig)
+    return Raycord.instance
   }
 
   private constructor(client: ClientData, public config: RaycordConfig) {
     this.commands = new Collection();
     this.events = new Collection();
     this.client = new RaycordClient(client);
-
-    this.setup()
   }
 
   public command(data: CommandData, runner: CommandRunner) {
@@ -44,14 +39,13 @@ export class Raycord {
 
   public setup() {
     const { fileExtension, rootDirectory } = this.config;
-    const path = `${rootDirectory}/**/*${fileExtension}`;
+    const path = `${rootDirectory}/commands**/*${fileExtension}`;
 
-    globSync(path).forEach(file => {
-      const command = require(resolve(file));
-      console.log(command.name);
+    globSync(path).forEach(async file => {
+      const { default: command } = await import(`../../${file}`);
       this.commands.set(command.name, command);
+      
+      console.log('Loading command: ' + command.name);
     })
   }
-
-  
 }
