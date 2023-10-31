@@ -10,12 +10,23 @@ import { ClientData } from "types/client";
 import { RaycordConfig } from "types/raycord";
 
 export class Raycord {
-
+  public static instance: Raycord;
   public client: RaycordClient;
   public commands: Collection<string, RaycordCommand>;
   public events: Collection<Events, RaycordEvent>;
   
-  public constructor(client: ClientData, public config: RaycordConfig) {
+  public static getInstance(client?: ClientData, config?: RaycordConfig) {
+    if (!this.instance && client && config) {
+      this.instance = new Raycord(client, config)
+      return this.instance;
+    } else if (this.instance) {
+      return this.instance;
+    } else {
+      return null;
+    }
+  }
+
+  private constructor(client: ClientData, public config: RaycordConfig) {
     this.commands = new Collection();
     this.events = new Collection();
     this.client = new RaycordClient(client);
@@ -24,13 +35,11 @@ export class Raycord {
   }
 
   public command(data: CommandData, runner: CommandRunner) {
-    const command = new RaycordCommand(data, runner);
-    return command;
+    return new RaycordCommand(data, runner);
   }
 
   public event(data: EventData, runner: EventRunner) {
-    const event = new RaycordEvent(data, runner);
-    return event;
+    return new RaycordEvent(data, runner);
   }
 
   public setup() {
@@ -39,9 +48,10 @@ export class Raycord {
 
     globSync(path).forEach(file => {
       const command = require(resolve(file));
-      console.log(command.name)
-      this.commands.set(command.name, command)
+      console.log(command.name);
+      this.commands.set(command.name, command);
     })
-
   }
+
+  
 }
