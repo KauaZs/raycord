@@ -14,5 +14,10 @@ export class RaycordClient extends Client implements ClientData {
     this.token = data.token;
     this.intents = data.intents;
     this.prefix = data.prefix;
+
+    this.botConnect()
+  }
+  botConnect() {
+    this.login(this.token)
   }
 }

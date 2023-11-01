@@ -39,13 +39,21 @@ export class Raycord {
 
   public setup() {
     const { fileExtension, rootDirectory } = this.config;
-    const path = `${rootDirectory}/commands**/*${fileExtension}`;
+    const pathCommands = `${rootDirectory}/commands**/*${fileExtension}`;
+    const pathEvents = `${rootDirectory}/events/*${fileExtension}`
 
-    globSync(path).forEach(async file => {
+    globSync(pathCommands).forEach(async file => {
       const { default: command } = await import(`../../${file}`);
       this.commands.set(command.name, command);
       
       console.log('Loading command: ' + command.name);
+    })
+
+    globSync(pathEvents).forEach(async file => {  
+      const { default: event } = await import(`../../${file}`)
+      
+      if(!event.once) this.client.on(event.type, event.runner)
+      else this.client.once(event.type, event.runner)
     })
   }
 }

@@ -26,3 +26,4 @@ const raycord = Raycord.getInstance({
 })
 
 raycord.setup();
+

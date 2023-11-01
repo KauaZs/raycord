@@ -5,7 +5,7 @@ export class RaycordEvent implements EventData {
   public type: Events;
   public once: boolean;
 
-  public constructor(data: EventData,public runner: EventRunner) {
+  public constructor(data: EventData, public runner: EventRunner) {
     this.type = data.type;
     this.once = data.once;
   }
