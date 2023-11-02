@@ -2,6 +2,7 @@ import { RaycordCommand } from "./RaycordCommand";
 import { Collection, Events } from 'discord.js';
 import { globSync } from 'glob'
 import { RaycordEvent } from "./RaycordEvent";
+import { RaycordSlash } from './RaycordSlash'
 import { RaycordClient } from "./RaycordClient";
 import { CommandData, CommandRunner } from "types/command";
 import { EventData, EventRunner } from "types/event";
@@ -13,7 +14,7 @@ export class Raycord {
   public client: RaycordClient;
   public commands: Collection<string, RaycordCommand>;
   public events: Collection<Events, RaycordEvent>;
-  
+  public slashCommands: Collection<string, RaycordSlash>
   public static getInstance(client?: ClientData, config?: RaycordConfig) {
     if (Raycord.instance) return this.instance;
 
@@ -25,7 +26,9 @@ export class Raycord {
 
   private constructor(client: ClientData, public config: RaycordConfig) {
     this.commands = new Collection();
+    this.slashCommands = new Collection();
     this.events = new Collection();
+
     this.client = new RaycordClient(client);
   }
 
@@ -41,6 +44,7 @@ export class Raycord {
     const { fileExtension, rootDirectory } = this.config;
     const pathCommands = `${rootDirectory}/commands**/*${fileExtension}`;
     const pathEvents = `${rootDirectory}/events/*${fileExtension}`
+    const pathSlash = `${rootDirectory}/slash/*${fileExtension}`
 
     globSync(pathCommands).forEach(async file => {
       const { default: command } = await import(`../../${file}`);
@@ -55,5 +59,13 @@ export class Raycord {
       if(!event.once) this.client.on(event.type, event.runner)
       else this.client.once(event.type, event.runner)
     })
+
+    globSync(pathSlash).forEach(async file => {
+      const { default: slash } = await import(`../../${file}`);
+      this.slashCommands.set(slash.name, slash.command);
+      
+      console.log('Loading slash command: ' + slash.name);
+    })
+
   }
 }

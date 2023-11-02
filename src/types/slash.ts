@@ -1,14 +1,15 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, Interaction, Snowflake } from "discord.js"
 
 
-export type CommandRunner = (includes: CommandIncludes) => any | Promise<any>
+export type SlashRunner = (includes: SlashIncludes) => any | Promise<any>
 
-export type CommandIncludes = { 
+export type SlashIncludes = { 
   interaction: Interaction,
   args: string[] 
 }
 
-export interface CommandData {
+
+export interface SlashData {
   name: string,
   category: string,
   description: string,

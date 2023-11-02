@@ -1,7 +1,7 @@
 import { GatewayIntentBits } from "discord.js";
 import dotenv from 'dotenv'
 import { Raycord } from "../src/structures/Raycord";
-
+import discord from 'discord.js'
 dotenv.config()
 
 const raycord = Raycord.getInstance({
@@ -17,7 +17,7 @@ const raycord = Raycord.getInstance({
         GatewayIntentBits.DirectMessageTyping,
         GatewayIntentBits.MessageContent,
     ],
-    prefix: '1',
+    prefix: '.',
     token: process.env.TOKEN as string
 }, {
     fileExtension: '.ts',
@@ -27,3 +27,4 @@ const raycord = Raycord.getInstance({
 
 raycord.setup();
 
+discord.ApplicationCommand
